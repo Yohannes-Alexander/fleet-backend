@@ -1,0 +1,76 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: fleet
+    ports: ["5432:5432"]
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: mosquitto
+    ports: ["1883:1883"]
+    volumes:
+      - ./config/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"  # UI management
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: fleet-api
+    env_file: .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mosquitto:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+    ports: ["8080:8080"]
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    container_name: fleet-worker
+    env_file: .env
+    depends_on:
+      - rabbitmq
+
+  publisher:
+    image: golang:1.22
+    container_name: mqtt-publisher
+    working_dir: /app
+    volumes:
+      - ./scripts:/app
+    command: bash -lc "go run mqtt_publisher.go"
+    environment:
+      MQTT_BROKER_URL: tcp://mosquitto:1883
+      VEHICLE_ID: B1234XYZ
+    depends_on:
+      - mosquitto
+
+volumes:
+  pgdata:
