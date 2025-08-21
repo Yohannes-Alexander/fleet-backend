@@ -5,19 +5,22 @@ import (
 	"fmt"
 	"math"
 	"math/rand"
+	"os"
 	"time"
 
 	paho "github.com/eclipse/paho.mqtt.golang"
 )
 
 func main() {
-	broker := getenv("MQTT_BROKER_URL", "tcp://localhost:1883")
+	broker := getenv("MQTT_BROKER_URL", "tcp://mosquitto:1883")
 	vehicle := getenv("VEHICLE_ID", "B1234XYZ")
 	topic := fmt.Sprintf("/fleet/vehicle/%s/location", vehicle)
 
 	opts := paho.NewClientOptions().AddBroker(broker).SetClientID("mock-pub-" + vehicle)
 	client := paho.NewClient(opts)
-	if token := client.Connect(); token.Wait() && token.Error() != nil { panic(token.Error()) }
+	if token := client.Connect(); token.Wait() && token.Error() != nil {
+		panic(token.Error())
+	}
 
 	// sekitar Monas
 	baseLat, baseLon := -6.1754, 106.8272
@@ -41,5 +44,9 @@ func main() {
 	}
 }
 
-func getenv(k, d string) string { if v := getenv0(k); v != "" { return v }; return d }
-func getenv0(k string) string { return map[string]string{}[k] } // replaced by os.Getenv in real use
+func getenv(k, d string) string {
+	if v := os.Getenv(k); v != "" {
+		return v
+	}
+	return d
+}

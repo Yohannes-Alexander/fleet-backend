@@ -60,17 +60,17 @@ services:
       - rabbitmq
 
   publisher:
-    image: golang:1.22
+    build:
+      context: .
+      dockerfile: Dockerfile.publisher
     container_name: mqtt-publisher
-    working_dir: /app
-    volumes:
-      - ./scripts:/app
-    command: bash -lc "go run mqtt_publisher.go"
     environment:
       MQTT_BROKER_URL: tcp://mosquitto:1883
       VEHICLE_ID: B1234XYZ
     depends_on:
       - mosquitto
+
+
 
 volumes:
   pgdata:

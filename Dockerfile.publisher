@@ -1,0 +1,15 @@
+# Dockerfile.publisher
+FROM golang:1.23-alpine AS builder
+
+WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY ./scripts .
+RUN go build -o publisher mqtt_publisher.go
+
+# final stage
+FROM alpine:3.18
+WORKDIR /app
+COPY --from=builder /app/publisher .
+CMD ["./publisher"]

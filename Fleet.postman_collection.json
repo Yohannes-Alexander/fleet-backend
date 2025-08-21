@@ -1,0 +1,62 @@
+{
+	"info": {
+		"_postman_id": "e28f4a16-ef7d-4576-ad57-b74845e14b6d",
+		"name": "Fleet",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "30086427"
+	},
+	"item": [
+		{
+			"name": "Get Last Location",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/vehicles/B1234XYZ/location",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"vehicles",
+						"B1234XYZ",
+						"location"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get History Location",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/vehicles/B1234XYZ/history?start=1755648000&end=1755820799",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"vehicles",
+						"B1234XYZ",
+						"history"
+					],
+					"query": [
+						{
+							"key": "start",
+							"value": "1755648000"
+						},
+						{
+							"key": "end",
+							"value": "1755820799"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
